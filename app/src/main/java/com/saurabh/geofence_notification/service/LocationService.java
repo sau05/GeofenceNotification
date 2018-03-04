@@ -22,9 +22,9 @@ import com.saurabh.geofence_notification.util.AppConstants;
 public class LocationService extends Service {
 
     private static final String TAG = "Locationservice";
-    private static final long TWO_MINUTES = 10*6*2;
+    private static final long TWO_MINUTES = 1000*60*2;
     private LocationManager mLocationManager;
-    private static final int LOCATION_INTERVAL = 40;
+    private static final int LOCATION_INTERVAL = 4000;
     private static final float LOCATION_DISTANCE = 10f;
     private Intent intent;
     private LocalBroadcastManager broadcastManager;
@@ -41,7 +41,7 @@ public class LocationService extends Service {
         @Override
         public void onLocationChanged(Location location) {
 //            mLastLocation.set(location);
-//            if (isBetterLocation(location,mLastLocation)){
+            if (isBetterLocation(location,mLastLocation)){
                 Log.e(TAG, "onLocationChanged: " + location.getLatitude());
                 location.getLatitude();
                 location.getLongitude();
@@ -49,7 +49,7 @@ public class LocationService extends Service {
                 intent.putExtra("Longitude",location.getLongitude());
                 intent.putExtra("provider",location.getProvider());
                 broadcastManager.sendBroadcast(intent);
-//            }
+            }
         }
 
         @Override

@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -205,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     private void checkGeofence(double userLat, double userLong) {
         boolean inside=checkInside(desiredLong,desiredLat,userLong,userLat);
+        Toast.makeText(getApplicationContext(),String.valueOf(inside),Toast.LENGTH_LONG).show();
         boolean outside=userLat>(desiredLat+radiusInMeters)||userLong>(desiredLong+radiusInMeters);
     }
 
