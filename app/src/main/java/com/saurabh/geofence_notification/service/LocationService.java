@@ -1,7 +1,7 @@
 package com.saurabh.geofence_notification.service;
 
 import android.Manifest;
-import android.app.Service;
+import android.app.IntentService;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -10,24 +10,34 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.saurabh.geofence_notification.util.AppConstants;
+import com.saurabh.geofence_notification.data.SQLiteDataProvider;
+import com.saurabh.geofence_notification.data.SQLiteHelper;
+import com.saurabh.geofence_notification.model.GeoItem;
+import com.saurabh.geofence_notification.notification.NotificationHandler;
 
 /**
  * Created by kiris on 3/3/2018.
  */
 
-public class LocationService extends Service {
+public class LocationService extends IntentService {
 
     private static final String TAG = "Locationservice";
     private static final long TWO_MINUTES = 1000*60*2;
     private LocationManager mLocationManager;
     private static final int LOCATION_INTERVAL = 4000;
     private static final float LOCATION_DISTANCE = 10f;
-    private Intent intent;
-    private LocalBroadcastManager broadcastManager;
+    private double radiusInMeters=500;
+    private double desiredLong;
+    private double desiredLat;
+    private Location desiredLocation;
+    private SQLiteDataProvider dataProvider;
+    private SQLiteHelper helper;
+
+    public LocationService() {
+        super("");
+    }
 
     private class LocationListener implements android.location.LocationListener {
 
@@ -43,12 +53,7 @@ public class LocationService extends Service {
 //            mLastLocation.set(location);
             if (isBetterLocation(location,mLastLocation)){
                 Log.e(TAG, "onLocationChanged: " + location.getLatitude());
-                location.getLatitude();
-                location.getLongitude();
-                intent.putExtra("Latitude",location.getLatitude());
-                intent.putExtra("Longitude",location.getLongitude());
-                intent.putExtra("provider",location.getProvider());
-                broadcastManager.sendBroadcast(intent);
+                checkGeofence(location);
             }
         }
 
@@ -80,20 +85,21 @@ public class LocationService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e(TAG, "onStartCommand");
-        super.onStartCommand(intent, flags, startId);
-        return START_STICKY;
+    protected void onHandleIntent(@Nullable Intent intent) {
+        if (intent != null) {
+            desiredLat=intent.getDoubleExtra("latitude",0);
+            desiredLong=intent.getDoubleExtra("longitude",0);
+        }
     }
 
     @Override
     public void onCreate() {
         Log.e(TAG, "onCreate");
-        broadcastManager= LocalBroadcastManager.getInstance(this);
-
-        intent=new Intent(AppConstants.GET_LOCATION);
+        super.onCreate();
         initializeLocationManager();
 
+        helper=new SQLiteHelper(getApplicationContext());
+        dataProvider=new SQLiteDataProvider(getApplicationContext(),helper);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             try {
                 mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
@@ -123,6 +129,7 @@ public class LocationService extends Service {
     public void onDestroy() {
         Log.e(TAG, "onDestroy");
         super.onDestroy();
+        helper.close();
         if (mLocationManager!=null){
             for (int i=0;i<mLocationListeners.length;i++){
                 try{
@@ -178,5 +185,37 @@ public class LocationService extends Service {
             return provider1==null;
         }
         return provider.equals(provider1);
+    }
+
+    private void checkGeofence(Location location) {
+        desiredLocation=new Location("");
+        desiredLocation.setLatitude(desiredLat);
+        desiredLocation.setLongitude(desiredLong);
+        boolean inside=location.distanceTo(desiredLocation)<=radiusInMeters;
+        GeoItem geoItem=new GeoItem();
+        geoItem.setLatitude(desiredLat);
+        geoItem.setLongitude(desiredLong);
+        geoItem.setRadius(radiusInMeters);
+        geoItem.setIn(inside);
+        geoItem.setOut(!inside);
+        if (dataProvider.getGeofence().isIn()){
+            if (!inside){
+                dataProvider.saveGeofence(geoItem);
+                NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area");
+            }
+        }else if (dataProvider.getGeofence().isOut()){
+            if (inside){
+                dataProvider.saveGeofence(geoItem);
+                NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are in area");
+            }
+        } else {
+            if(inside){
+                dataProvider.saveGeofence(geoItem);
+                NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are in area");
+            }else {
+                dataProvider.saveGeofence(geoItem);
+                NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area");
+            }
+        }
     }
 }

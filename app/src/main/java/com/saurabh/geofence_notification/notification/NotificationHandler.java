@@ -14,9 +14,9 @@ import com.saurabh.geofence_notification.R;
 
 public class NotificationHandler {
 
-    public NotificationHandler(){}
+//    public NotificationHandler(){}
 
-    public void sendNotification(Context context,String title,String body){
+    public static void sendNotification(Context context,String title,String body){
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder=new NotificationCompat.Builder(context,"")
