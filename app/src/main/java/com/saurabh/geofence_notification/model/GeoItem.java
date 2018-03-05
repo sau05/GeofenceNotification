@@ -8,13 +8,6 @@ public class GeoItem {
     private double latitude,longitude,radius;
     private boolean in,out;
 
-//    public GeoItem(double latitude,double longitude,double radius,boolean in,boolean out){
-//        this.latitude=latitude;
-//        this.longitude=longitude;
-//        this.radius=radius;
-//        this.in=in;
-//        this.out=out;
-//    }
     public double getLatitude() {
         return latitude;
     }

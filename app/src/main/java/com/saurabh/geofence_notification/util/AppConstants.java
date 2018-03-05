@@ -5,7 +5,6 @@ package com.saurabh.geofence_notification.util;
  */
 
 public class AppConstants {
-    public static final String GET_LOCATION="broadcastLocation";
     public static final int PERMISSION_REQUEST_CODE=100;
 
 }

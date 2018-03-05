@@ -2,9 +2,9 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/constraintLayout"
     tools:context="com.saurabh.geofence_notification.activity.MainActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -17,20 +17,22 @@
         app:layout_constraintTop_toBottomOf="@+id/button"
         tools:context=".activity.MainActivity" />
 
-        <EditText
-            android:id="@+id/editText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="number"
-            android:hint="Radius in meters"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="0dp"
-            tools:ignore="MissingConstraints" />
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:ems="10"
+        android:hint="Radius in meters"
+        android:inputType="number"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
+
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Submit"
-        app:layout_constraintLeft_toRightOf="@+id/editText"/>
+        app:layout_constraintLeft_toRightOf="@+id/editText" />
 </android.support.constraint.ConstraintLayout>

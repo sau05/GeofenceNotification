@@ -25,10 +25,9 @@ public class LocationService extends IntentService {
     private LocationManager mLocationManager;
     private static final int LOCATION_INTERVAL = 0;
     private static final float LOCATION_DISTANCE = 0;
-    private double radiusInMeters=500;
+    private double radiusInMeters;
     private double desiredLong;
     private double desiredLat;
-    private Location desiredLocation;
     private SQLiteDataProvider dataProvider;
     private SQLiteHelper helper;
 
@@ -47,7 +46,6 @@ public class LocationService extends IntentService {
 
         @Override
         public void onLocationChanged(Location location) {
-//            mLastLocation.set(location);
             if (isBetterLocation(location,mLastLocation)){
                 Log.e(TAG, "onLocationChanged: " + location.getLatitude());
                 checkGeofence(location);
@@ -86,12 +84,12 @@ public class LocationService extends IntentService {
         if (intent != null) {
             desiredLat=intent.getDoubleExtra("latitude",0);
             desiredLong=intent.getDoubleExtra("longitude",0);
+            radiusInMeters=intent.getDoubleExtra("radius",0);
         }
     }
 
     @Override
     public void onCreate() {
-        Log.e(TAG, "onCreate");
         super.onCreate();
         initializeLocationManager();
 
@@ -123,7 +121,6 @@ public class LocationService extends IntentService {
 
     @Override
     public void onDestroy() {
-        Log.e(TAG, "onDestroy");
         super.onDestroy();
         helper.close();
         if (mLocationManager!=null){
@@ -184,7 +181,7 @@ public class LocationService extends IntentService {
     }
 
     private void checkGeofence(Location location) {
-        desiredLocation=new Location("");
+        Location desiredLocation = new Location("");
         desiredLocation.setLatitude(desiredLat);
         desiredLocation.setLongitude(desiredLong);
         boolean inside=location.distanceTo(desiredLocation)<=radiusInMeters;
@@ -192,46 +189,30 @@ public class LocationService extends IntentService {
         geoItem.setLatitude(desiredLat);
         geoItem.setLongitude(desiredLong);
         geoItem.setRadius(radiusInMeters);
-//        geoItem.setIn(inside);
-//        geoItem.setOut(!inside);
-        Log.d(TAG,""+dataProvider.getGeofence().isIn()+" "+dataProvider.getGeofence().isOut());
         if (dataProvider.getGeofence().isIn()){
             if (!inside){
                 geoItem.setIn(false);
                 geoItem.setOut(true);
                 dataProvider.saveGeofence(geoItem);
-                NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area");
+                NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area",1);
             }
         }else if (dataProvider.getGeofence().isOut()){
             if (inside){
                 geoItem.setIn(true);
                 geoItem.setOut(false);
                 dataProvider.saveGeofence(geoItem);
-                NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are in area");
+                NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are selected in area",0);
             }
         } else {
             geoItem.setIn(inside);
             geoItem.setOut(!inside);
             if(inside){
                 dataProvider.saveGeofence(geoItem);
-                NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are in area");
+                NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are selected in area",0);
             }else {
                 dataProvider.saveGeofence(geoItem);
-                NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area");
+                NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area",1);
             }
         }
-//        if (dataProvider.getGeofence().isIn()||dataProvider.getGeofence().isOut()){
-//
-//        }else {
-//            geoItem.setIn(inside);
-//            geoItem.setOut(!inside);
-//            if(inside){
-//                dataProvider.saveGeofence(geoItem);
-//                NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are in area");
-//            }else {
-//                dataProvider.saveGeofence(geoItem);
-//                NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area");
-//            }
-//        }
     }
 }

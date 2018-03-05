@@ -16,7 +16,7 @@ public class NotificationHandler {
 
 //    public NotificationHandler(){}
 
-    public static void sendNotification(Context context,String title,String body){
+    public static void sendNotification(Context context,String title,String body,int id){
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder=new NotificationCompat.Builder(context,"")
@@ -26,6 +26,8 @@ public class NotificationHandler {
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri);
         NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0,notificationBuilder.build());
+        if (notificationManager != null) {
+            notificationManager.notify(id,notificationBuilder.build());
+        }
     }
 }
