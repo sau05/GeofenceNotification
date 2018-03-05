@@ -1,4 +1,5 @@
 # GeofenceNotification
+# Geofencing without google play services
 1.long press event is used to enable Geofencing
 2.Runtime permission is handled for Android Marshmellow and above versions
 2.default radius for Geofence is 250 meters
