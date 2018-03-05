@@ -1,15 +1,12 @@
 package com.saurabh.geofence_notification.service;
 
-import android.Manifest;
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.saurabh.geofence_notification.data.SQLiteDataProvider;
@@ -26,8 +23,8 @@ public class LocationService extends IntentService {
     private static final String TAG = "Locationservice";
     private static final long TWO_MINUTES = 1000*60*2;
     private LocationManager mLocationManager;
-    private static final int LOCATION_INTERVAL = 4000;
-    private static final float LOCATION_DISTANCE = 10f;
+    private static final int LOCATION_INTERVAL = 0;
+    private static final float LOCATION_DISTANCE = 0;
     private double radiusInMeters=500;
     private double desiredLong;
     private double desiredLat;
@@ -100,7 +97,6 @@ public class LocationService extends IntentService {
 
         helper=new SQLiteHelper(getApplicationContext());
         dataProvider=new SQLiteDataProvider(getApplicationContext(),helper);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             try {
                 mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                         LOCATION_INTERVAL, LOCATION_DISTANCE, mLocationListeners[1]);
@@ -122,7 +118,7 @@ public class LocationService extends IntentService {
                 e.printStackTrace();
                 Log.d(TAG, "gps provider does not exist " + e.getMessage());
             }
-        }
+
     }
 
     @Override
@@ -196,19 +192,26 @@ public class LocationService extends IntentService {
         geoItem.setLatitude(desiredLat);
         geoItem.setLongitude(desiredLong);
         geoItem.setRadius(radiusInMeters);
-        geoItem.setIn(inside);
-        geoItem.setOut(!inside);
+//        geoItem.setIn(inside);
+//        geoItem.setOut(!inside);
+        Log.d(TAG,""+dataProvider.getGeofence().isIn()+" "+dataProvider.getGeofence().isOut());
         if (dataProvider.getGeofence().isIn()){
             if (!inside){
+                geoItem.setIn(false);
+                geoItem.setOut(true);
                 dataProvider.saveGeofence(geoItem);
                 NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area");
             }
         }else if (dataProvider.getGeofence().isOut()){
             if (inside){
+                geoItem.setIn(true);
+                geoItem.setOut(false);
                 dataProvider.saveGeofence(geoItem);
                 NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are in area");
             }
         } else {
+            geoItem.setIn(inside);
+            geoItem.setOut(!inside);
             if(inside){
                 dataProvider.saveGeofence(geoItem);
                 NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are in area");
@@ -217,5 +220,18 @@ public class LocationService extends IntentService {
                 NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area");
             }
         }
+//        if (dataProvider.getGeofence().isIn()||dataProvider.getGeofence().isOut()){
+//
+//        }else {
+//            geoItem.setIn(inside);
+//            geoItem.setOut(!inside);
+//            if(inside){
+//                dataProvider.saveGeofence(geoItem);
+//                NotificationHandler.sendNotification(getApplicationContext(),"Enter","You are in area");
+//            }else {
+//                dataProvider.saveGeofence(geoItem);
+//                NotificationHandler.sendNotification(getApplicationContext(),"Exit","You are out of the area");
+//            }
+//        }
     }
 }

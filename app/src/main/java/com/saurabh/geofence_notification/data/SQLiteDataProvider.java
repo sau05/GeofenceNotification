@@ -26,19 +26,20 @@ public class SQLiteDataProvider {
         cv.put("lat",geoItem.getLatitude());
         cv.put("longitude",geoItem.getLongitude());
         cv.put("radius",geoItem.getRadius());
-        cv.put("inside",geoItem.isIn()?0:1);
-        cv.put("outside",geoItem.isOut()?0:1);
+        cv.put("inside",geoItem.isIn()?1:0);
+        cv.put("outside",geoItem.isOut()?1:0);
         db.insertWithOnConflict("tbl_geo",null,cv,SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     public GeoItem getGeofence(){
         SQLiteDatabase db=helper.getReadableDatabase();
-        GeoItem geoItem=new GeoItem();
+        GeoItem geoItem=null;
         Cursor c=null;
         try {
             c=db.query("tbl_geo",new String[]{"lat","longitude","radius","inside","outside"},null,null,null,null,null);
             if (c!=null){
-                if (c.moveToNext()){
+                if (c.moveToFirst()){
+                    geoItem=new GeoItem();
                     geoItem.setLatitude(c.getDouble(c.getColumnIndex(("lat"))));
                     geoItem.setLongitude(c.getDouble(c.getColumnIndex("longitude")));
                     geoItem.setRadius(c.getDouble(c.getColumnIndex("radius")));
