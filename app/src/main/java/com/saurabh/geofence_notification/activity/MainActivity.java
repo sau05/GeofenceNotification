@@ -34,10 +34,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     GoogleMap mMap;
     private Circle mCircle;
     private double desiredLong, desiredLat;
-    double radiusInMeters = 500.0;
+    double radiusInMeters = 250.0;
     private EditText editRadius;
-    private Button btnSubmit;
-    private Snackbar mSnackbar;
     private View view;
     private SQLiteHelper sqLiteHelper;
     private SQLiteDataProvider dataProvider;
@@ -49,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         view = findViewById(R.id.constraintLayout);
         editRadius = findViewById(R.id.editText);
-        btnSubmit = findViewById(R.id.button);
+        Button btnSubmit = findViewById(R.id.button);
         btnSubmit.setOnClickListener(this);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onStart() {
         super.onStart();
-        mSnackbar = Snackbar.make(view, "Long press to active geofence", Snackbar.LENGTH_LONG);
+        Snackbar mSnackbar = Snackbar.make(view, "Long press to active geofence", Snackbar.LENGTH_LONG);
         mSnackbar.show();
     }
 
